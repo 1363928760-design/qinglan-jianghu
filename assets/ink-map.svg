@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="青岚山水图">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ead7ae"/>
+      <stop offset="1" stop-color="#93744b"/>
+    </linearGradient>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="1.2"/>
+    </filter>
+  </defs>
+  <rect width="240" height="240" rx="16" fill="#141916"/>
+  <rect x="11" y="11" width="218" height="218" rx="13" fill="url(#paper)"/>
+  <path d="M22 174c26-12 41-48 67-48 31 0 40 42 72 39 19-2 31-20 57-16v70H22z" fill="#263a31" opacity=".84"/>
+  <path d="M23 148c34-8 51-57 87-55 31 2 39 32 64 30 17-1 28-16 43-14v42c-32-10-43 13-69 13-27 0-38-35-64-35-25 0-36 30-61 39z" fill="#496352" opacity=".78"/>
+  <path d="M36 82c20-21 40-33 59-36 20-3 33 9 49 7 16-1 29-16 56-13-23 9-33 31-55 34-25 3-35-17-57-14-17 2-35 13-52 22z" fill="#79443a" opacity=".8" filter="url(#soft)"/>
+  <path d="M53 189c26-8 47-13 73-12 24 1 46 8 72 20" fill="none" stroke="#d8c395" stroke-width="3" stroke-linecap="round" opacity=".75"/>
+  <path d="M56 120c12 7 25 8 39 3M125 92c18 10 35 9 52-1M70 157c12 2 23 0 34-8" fill="none" stroke="#19211d" stroke-width="3" stroke-linecap="round" opacity=".58"/>
+  <g fill="#7b2f27">
+    <rect x="172" y="166" width="38" height="38" rx="3"/>
+    <path d="M181 178h20v4h-20zM181 188h20v4h-20z" fill="#e4c48b"/>
+  </g>
+  <circle cx="55" cy="54" r="16" fill="#b94e3a" opacity=".85"/>
+  <path d="M42 213c35-17 80-20 146-2" fill="none" stroke="#402b22" stroke-width="4" stroke-linecap="round" opacity=".65"/>
+</svg>

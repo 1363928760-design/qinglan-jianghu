@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#18211d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="青岚江湖">
+  <title>青岚江湖 · 单机文字 MUD 纵向切片</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./assets/icon-180.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app" class="app shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="./assets/ink-map.svg" alt="青岚山水图">
+        <div>
+          <h1>青岚江湖</h1>
+          <p>单机文字 MUD</p>
+        </div>
+      </div>
+
+      <section class="panel compact">
+        <div class="avatar-row">
+          <div class="seal">岚</div>
+          <div>
+            <div id="heroName" class="hero-name">少侠</div>
+            <div id="heroTitle" class="muted">初入江湖</div>
+          </div>
+        </div>
+        <div class="bars">
+          <div class="bar"><span>气血</span><i id="hpBar"></i><b id="hpText"></b></div>
+          <div class="bar inner"><span>内力</span><i id="mpBar"></i><b id="mpText"></b></div>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="主导航">
+        <button data-tab="jianghu" class="active">江湖</button>
+        <button data-tab="martial">武学</button>
+        <button data-tab="pack">行囊</button>
+        <button data-tab="role">角色</button>
+        <button data-tab="log">日志</button>
+      </nav>
+
+      <section class="panel compact resources">
+        <div><span>银两</span><b id="silverText">0</b></div>
+        <div><span>修为</span><b id="cultText">0</b></div>
+        <div><span>阅历</span><b id="expText">0</b></div>
+        <div><span>门贡</span><b id="contribText">0</b></div>
+      </section>
+
+      <div class="side-actions">
+        <button id="saveBtn">保存</button>
+        <button id="exportBtn">导出</button>
+        <button id="resetBtn" class="danger">重开</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div id="locationName" class="location-name">平安镇</div>
+          <div id="locationDesc" class="muted">小镇依水而建，茶旗与药香在街口慢慢晃。</div>
+        </div>
+        <div class="clock">
+          <span id="idleMode">当前：打坐吐纳</span>
+          <b id="dayText">第 1 日 · 清晨</b>
+        </div>
+      </header>
+
+      <section id="offlineNotice" class="offline hidden"></section>
+
+      <section id="viewJianghu" class="view active">
+        <div class="grid two">
+          <section class="panel">
+            <div class="section-head">
+              <h2>行走江湖</h2>
+              <span id="dangerText" class="tag">安稳</span>
+            </div>
+            <div id="mapButtons" class="button-grid"></div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <h2>日常安排</h2>
+              <span class="tag quiet">离线生效</span>
+            </div>
+            <div id="idleActions" class="button-grid"></div>
+          </section>
+        </div>
+
+        <div class="grid two">
+          <section class="panel">
+            <div class="section-head">
+              <h2>当前地点</h2>
+              <button id="exploreBtn">探查</button>
+            </div>
+            <div id="locationActions" class="button-grid"></div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <h2>战斗</h2>
+              <span id="combatStatus" class="tag quiet">未交手</span>
+            </div>
+            <div id="enemyList" class="button-grid"></div>
+            <div id="combatLog" class="combat-log"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="viewMartial" class="view">
+        <div class="grid two">
+          <section class="panel">
+            <div class="section-head">
+              <h2>青岚武学</h2>
+              <span class="tag">十二门</span>
+            </div>
+            <div id="skillList" class="skill-list"></div>
+          </section>
+          <section class="panel">
+            <div class="section-head">
+              <h2>修习</h2>
+              <span id="selectedSkillTag" class="tag quiet">未选择</span>
+            </div>
+            <div id="skillDetail" class="skill-detail muted">选择一门武学查看招式与修习消耗。</div>
+          </section>
+        </div>
+      </section>
+
+      <section id="viewPack" class="view">
+        <div class="grid two">
+          <section class="panel">
+            <div class="section-head">
+              <h2>行囊</h2>
+              <span id="itemCount" class="tag quiet">0 件</span>
+            </div>
+            <div id="inventoryList" class="inventory-list"></div>
+          </section>
+          <section class="panel">
+            <div class="section-head">
+              <h2>装备</h2>
+              <span class="tag">朴素</span>
+            </div>
+            <div id="equipList" class="equip-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="viewRole" class="view">
+        <div class="grid two">
+          <section class="panel">
+            <div class="section-head">
+              <h2>人物</h2>
+              <span id="realmTag" class="tag">未入流</span>
+            </div>
+            <div id="statsList" class="stats-list"></div>
+          </section>
+          <section class="panel">
+            <div class="section-head">
+              <h2>门派</h2>
+              <span class="tag">青岚剑派</span>
+            </div>
+            <div class="sect-copy">
+              <p>青岚剑派立在山雨之间，讲究“剑起有痕，心落无声”。掌门不问出身，只看弟子能否守住一口清气。</p>
+              <button id="sectTaskBtn">接门派差事</button>
+              <button id="healBtn">药庐调息</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="viewLog" class="view">
+        <section class="panel">
+          <div class="section-head">
+            <h2>江湖日志</h2>
+            <button id="clearLogBtn">清空</button>
+          </div>
+          <div id="eventLog" class="event-log"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="choiceDialog">
+    <form method="dialog" class="dialog-body">
+      <div class="section-head">
+        <h2 id="choiceTitle">奇遇</h2>
+        <button value="close" class="icon-btn">×</button>
+      </div>
+      <p id="choiceText"></p>
+      <div id="choiceOptions" class="button-grid"></div>
+    </form>
+  </dialog>
+
+  <script src="./game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js");
+      });
+    }
+  </script>
+</body>
+</html>
