@@ -412,6 +412,7 @@ function renderAll() {
   renderInventory();
   renderStats();
   renderLog();
+  renderRecentLog();
 }
 
 function renderMap() {
@@ -710,6 +711,12 @@ function renderLog() {
   $("eventLog").innerHTML = state.log.map((line) => `<div>${line}</div>`).join("");
 }
 
+function renderRecentLog() {
+  const target = $("recentLog");
+  if (!target) return;
+  target.innerHTML = state.log.slice(0, 6).map((line) => `<div>${line}</div>`).join("");
+}
+
 function triggerEvent() {
   const pool = DATA.events.filter((event) => event.loc === state.location);
   const event = pick(pool);
@@ -739,9 +746,9 @@ function triggerEvent() {
 }
 
 function setupEvents() {
-  document.querySelectorAll(".tabs button").forEach((btn) => {
+  document.querySelectorAll(".bottom-tabs button").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".tabs button").forEach((item) => item.classList.remove("active"));
+      document.querySelectorAll(".bottom-tabs button").forEach((item) => item.classList.remove("active"));
       document.querySelectorAll(".view").forEach((view) => view.classList.remove("active"));
       btn.classList.add("active");
       $(`view${btn.dataset.tab[0].toUpperCase()}${btn.dataset.tab.slice(1)}`).classList.add("active");
