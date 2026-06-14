@@ -53,57 +53,129 @@
     <main class="mud-main">
       <section id="offlineNotice" class="offline hidden"></section>
 
-      <section id="viewJianghu" class="view active">
-        <section class="paper location-card">
-          <div class="section-head">
-            <div>
-              <h2 id="locationName">平安镇</h2>
-              <p id="locationDesc">小镇依水而建，茶旗与药香在街口慢慢晃。</p>
+      <section id="viewHome" class="view active">
+        <section class="paper">
+          <div class="section-head slim">
+            <h2 id="hallName">碧海楼</h2>
+            <span id="hallTag" class="stamp">大厅</span>
+          </div>
+          <div class="hall-status">
+            <div><span>经验</span><b id="hallExpText">0</b></div>
+            <div><span>潜能</span><b id="hallCultText">0</b></div>
+            <div><span>金钱</span><b id="hallSilverText">0</b></div>
+            <div><span>门派声望</span><b id="hallContribText">0</b></div>
+          </div>
+          <div class="hall-quote" id="hallQuote">屋外传来一阵敲门声，应是有人前来拜访。</div>
+        </section>
+
+        <section class="paper">
+          <div class="section-head slim">
+            <h2>功能入口</h2>
+          </div>
+          <div class="hall-grid">
+            <button id="enterJianghuBtn" class="hall-btn major">江湖</button>
+            <button id="enterMartialBtn" class="hall-btn">武学</button>
+            <button id="enterPackBtn" class="hall-btn">行囊</button>
+            <button id="enterRoleBtn" class="hall-btn">师门</button>
+            <button id="enterTaskBtn" class="hall-btn">任务</button>
+            <button id="enterSettingsBtn" class="hall-btn">设置</button>
+          </div>
+        </section>
+
+        <section class="paper">
+          <div class="section-head slim">
+            <h2>活动</h2>
+            <span class="hint">待办</span>
+          </div>
+          <div id="hallActivity" class="text-log compact-log"></div>
+        </section>
+      </section>
+
+      <section id="viewJianghu" class="view">
+        <section id="chapterSelect" class="jianghu-screen">
+          <section class="paper">
+            <div class="section-head">
+              <div>
+                <span class="chapter-title">江湖地图</span>
+                <h2>章节目录</h2>
+                <p>点开章节进入格子地图，再点格子进房间。</p>
+              </div>
+              <button id="backHomeBtn" class="icon-btn">×</button>
             </div>
-            <span id="dangerText" class="stamp">安稳</span>
-          </div>
-          <div class="quick-row">
-            <button id="exploreBtn">四处探查</button>
-            <button id="exportBtn">导出存档</button>
-          </div>
+            <div id="chapterList" class="chapter-grid"></div>
+          </section>
+
+          <section class="paper">
+            <div class="section-head slim">
+              <h2>离线修行</h2>
+              <span class="hint">持续生效</span>
+            </div>
+            <div id="idleActions" class="command-list"></div>
+          </section>
         </section>
 
-        <section class="paper">
-          <div class="section-head slim">
-            <h2>江湖路径</h2>
-          </div>
-          <div id="mapButtons" class="command-list"></div>
-        </section>
+        <section id="roomScreen" class="jianghu-screen hidden">
+          <section class="paper room-card">
+            <div class="section-head">
+              <div>
+                <span id="chapterTitle" class="chapter-title">第一章</span>
+                <h2 id="locationName">平安镇</h2>
+                <p id="locationDesc">小镇依水而建，茶旗与药香在街口慢慢晃。</p>
+              </div>
+              <span id="dangerText" class="stamp">安稳</span>
+            </div>
+            <div class="quick-row">
+              <button id="backChapterBtn">章节目录</button>
+              <button id="exportBtn">导出存档</button>
+            </div>
+          </section>
 
-        <section class="paper">
-          <div class="section-head slim">
-            <h2>日常修行</h2>
-            <span class="hint">离线生效</span>
-          </div>
-          <div id="idleActions" class="command-list"></div>
-        </section>
+          <section class="paper">
+            <div class="section-head slim">
+              <h2>章节地图</h2>
+              <span id="chapterGoal" class="hint">查访空船来历</span>
+            </div>
+            <div id="roomGrid" class="room-grid"></div>
+            <div id="mapButtons" class="command-list"></div>
+          </section>
 
-        <section class="paper">
-          <div class="section-head slim">
-            <h2>地点指令</h2>
-          </div>
-          <div id="locationActions" class="command-list"></div>
-        </section>
+          <section class="paper">
+            <div class="section-head slim">
+              <h2>人物交互</h2>
+              <span class="hint">交谈 / 切磋</span>
+            </div>
+            <div id="npcActions" class="command-list"></div>
+          </section>
 
-        <section class="paper">
-          <div class="section-head slim">
-            <h2>切磋战斗</h2>
-            <span id="combatStatus" class="hint">未交手</span>
-          </div>
-          <div id="enemyList" class="command-list"></div>
-          <div id="combatLog" class="text-log"></div>
-        </section>
+          <section class="paper">
+            <div class="section-head slim">
+              <h2>章节剧情</h2>
+            </div>
+            <div id="storyActions" class="command-list"></div>
+          </section>
 
-        <section class="paper">
-          <div class="section-head slim">
-            <h2>近期传闻</h2>
-          </div>
-          <div id="recentLog" class="text-log compact-log"></div>
+          <section class="paper">
+            <div class="section-head slim">
+              <h2>地点指令</h2>
+            </div>
+            <div id="locationActions" class="command-list"></div>
+          </section>
+
+          <section class="paper">
+            <div class="section-head slim">
+              <h2>切磋战斗</h2>
+              <span id="combatStatus" class="hint">未交手</span>
+            </div>
+            <div id="enemyList" class="command-list"></div>
+            <div id="combatLog" class="text-log"></div>
+          </section>
+
+          <section class="paper">
+            <div class="section-head slim">
+              <h2>近期传闻</h2>
+            </div>
+            <div id="recentLog" class="text-log compact-log"></div>
+          </section>
         </section>
       </section>
 
@@ -171,13 +243,7 @@
       </section>
     </main>
 
-    <nav class="bottom-tabs" aria-label="主导航">
-      <button data-tab="jianghu" class="active"><b>江湖</b><span>地图</span></button>
-      <button data-tab="martial"><b>武学</b><span>修习</span></button>
-      <button data-tab="pack"><b>行囊</b><span>装备</span></button>
-      <button data-tab="role"><b>角色</b><span>门派</span></button>
-      <button data-tab="log"><b>日志</b><span>传闻</span></button>
-    </nav>
+    <footer class="rumor-bar" id="rumorBar">屋外传来一阵敲门声，应是有人前来拜访。</footer>
   </div>
 
   <dialog id="choiceDialog">

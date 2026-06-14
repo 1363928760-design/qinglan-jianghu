@@ -3,6 +3,194 @@ const TICK_MS = 1000;
 const GAME_MINUTES_PER_TICK = 6;
 
 const DATA = {
+  chapters: {
+    ch1: {
+      order: 1,
+      name: "第一章 平安镇疑信",
+      goal: "查访空船来历，找出送信人的去向。",
+      start: "town_gate",
+      unlock: null,
+      rooms: {
+        town_gate: {
+          name: "镇口",
+          loc: "town",
+          x: 1,
+          y: 2,
+          desc: "青石牌坊立在风里，进镇的人都要在这里慢下脚步。",
+          exits: { north: "main_street" },
+          npcs: [
+            { id: "old_guard", name: "守镇老卒", role: "镇口守卒", talk: "老卒压低声音：昨夜空船靠岸时，没有听见橹声，像是顺水飘来的。", spar: "drunkard" }
+          ],
+          story: [
+            { id: "ask_guard", name: "询问守镇老卒", gain: { exp: 8 }, once: true, text: "老卒说昨夜渡口有空船靠岸，船底还沾着山泥。" }
+          ]
+        },
+        main_street: {
+          name: "长街",
+          loc: "town",
+          x: 1,
+          y: 1,
+          desc: "长街两旁铺子半开，茶香、药味和湿木气混在一起。",
+          exits: { south: "town_gate", east: "tea_house", west: "clinic", north: "ferry" },
+          npcs: [
+            { id: "errand_boy", name: "跑堂少年", role: "街头耳目", talk: "少年说清晨有人买了斗笠和草鞋，鞋底沾着很重的泥。", spar: "streetRogue" }
+          ],
+          story: [
+            { id: "listen_street", name: "听街坊议论", gain: { exp: 10 }, once: true, text: "街坊说有个戴斗笠的人天未亮便往雁回林去了。" }
+          ]
+        },
+        tea_house: {
+          name: "小茶肆",
+          loc: "town",
+          x: 2,
+          y: 1,
+          desc: "茶旗低低垂着，掌柜一边擦桌一边留心每个客人的刀。",
+          exits: { west: "main_street" },
+          npcs: [
+            { id: "tea_boss", name: "茶肆掌柜", role: "消息商人", talk: "掌柜笑着添茶：江湖人说话，七分茶香三分真，剩下的都在眼神里。", spar: null }
+          ],
+          story: [
+            { id: "buy_clue", name: "请掌柜添茶", cost: { silver: 5 }, gain: { exp: 12 }, once: true, text: "掌柜压低声音：空船上的信纸，是青岚山下旧纸坊的货。" }
+          ]
+        },
+        clinic: {
+          name: "回春堂",
+          loc: "town",
+          x: 0,
+          y: 1,
+          desc: "药柜上贴着褪色药签，童子正在筛晒止血草。",
+          exits: { east: "main_street" },
+          npcs: [
+            { id: "herb_child", name: "药庐童子", role: "回春堂学徒", talk: "童子递来药杵：伤药救人，也能看出谁刚从险地回来。", spar: null }
+          ],
+          story: [
+            { id: "help_clinic", name: "帮忙碾药", gain: { exp: 6, silver: 6 }, item: "herb", once: true, text: "药童谢你手稳，送你一包止血草。" }
+          ]
+        },
+        ferry: {
+          name: "旧渡口",
+          loc: "town",
+          x: 1,
+          y: 0,
+          desc: "木桩上还留着湿绳印，空船似乎刚被人拖走。",
+          exits: { south: "main_street", east: "warehouse" },
+          npcs: [
+            { id: "boatman", name: "渡口船夫", role: "摆渡人", talk: "船夫盯着水面：那船吃水很深，不像空船，倒像藏过货。", spar: "drunkard" }
+          ],
+          story: [
+            { id: "inspect_boat", name: "查看船痕", gain: { exp: 16 }, flag: "boat_trace", once: true, text: "你在木桩下找到一撮黑泥，泥里夹着雁回林特有的松针。" }
+          ]
+        },
+        warehouse: {
+          name: "废仓",
+          loc: "town",
+          x: 2,
+          y: 0,
+          desc: "废仓门板半掩，里面有被匆忙翻动过的麻袋。",
+          exits: { west: "ferry" },
+          npcs: [
+            { id: "masked_looter", name: "翻仓客", role: "可疑江湖人", talk: "那人捂住袖口：此地无主，谁先找到便是谁的。", spar: "streetRogue" }
+          ],
+          story: [
+            { id: "finish_ch1", name: "搜查废仓", requires: "boat_trace", gain: { exp: 32, silver: 18 }, flag: "ch1_done", unlockChapter: "ch2", once: true, text: "你搜出一枚刻着林字的铜牌。线索指向雁回林，第二章已开启。" }
+          ]
+        }
+      }
+    },
+    ch2: {
+      order: 2,
+      name: "第二章 雁回林夜火",
+      goal: "循着铜牌追入雁回林，查清夜火背后的买卖。",
+      start: "forest_edge",
+      unlock: "ch1_done",
+      rooms: {
+        forest_edge: {
+          name: "林口",
+          loc: "forest",
+          x: 1,
+          y: 2,
+          desc: "林口鸟声稀疏，泥路上有新踩出的马蹄印。",
+          exits: { north: "pine_path", east: "herb_slope" },
+          npcs: [
+            { id: "woodcutter", name: "砍柴人", role: "林口向导", talk: "砍柴人把柴刀背到身后：林里昨夜有火，今早却没有烟。", spar: "banditScout" }
+          ],
+          story: [
+            { id: "read_token", name: "比对铜牌痕迹", gain: { exp: 12 }, once: true, text: "铜牌边缘的松脂味很重，像是刚从林中木箱上拆下。" }
+          ]
+        },
+        herb_slope: {
+          name: "药坡",
+          loc: "forest",
+          x: 2,
+          y: 2,
+          desc: "坡上草药被踩倒一片，有人曾在这里急停。",
+          exits: { west: "forest_edge", north: "hunter_hut" },
+          npcs: [
+            { id: "herb_picker", name: "采药客", role: "山中药客", talk: "采药客指着折草：有人在这里停过，脚步乱，像被追急了。", spar: "herbGuard" }
+          ],
+          story: [
+            { id: "gather_slope", name: "采拣折草", gain: { exp: 8 }, item: "herb", once: true, text: "你捡起几株未坏的止血草，也看见一串往北的脚印。" }
+          ]
+        },
+        pine_path: {
+          name: "松针小径",
+          loc: "forest",
+          x: 1,
+          y: 1,
+          desc: "松针铺地，脚步声会被吞去大半。",
+          exits: { south: "forest_edge", east: "hunter_hut", north: "fire_camp" },
+          npcs: [
+            { id: "forest_scout", name: "林中斥候", role: "探路山贼", talk: "斥候冷笑：知道得太多的人，通常走不出这片松林。", spar: "banditScout" }
+          ],
+          story: [
+            { id: "ambush_scout", name: "截住探路山贼", combat: "banditScout", gain: { exp: 10 }, flag: "scout_down", once: true, text: "你从树后掠出，截住一名探路山贼。" }
+          ]
+        },
+        hunter_hut: {
+          name: "猎户旧屋",
+          loc: "forest",
+          x: 2,
+          y: 1,
+          desc: "屋中炉灰尚温，墙上挂着一张残破林图。",
+          exits: { west: "pine_path", south: "herb_slope" },
+          npcs: [
+            { id: "old_hunter", name: "老猎户", role: "旧屋主人", talk: "老猎户说：这图不是给猎人看的，是给走夜路的人看的。", spar: "wildWolf" }
+          ],
+          story: [
+            { id: "take_map", name: "取下残图", gain: { exp: 18 }, flag: "forest_map", once: true, text: "残图标出一处隐秘营火点，正与镇上空船线索吻合。" }
+          ]
+        },
+        fire_camp: {
+          name: "夜火营地",
+          loc: "forest",
+          x: 1,
+          y: 0,
+          desc: "灰烬里还埋着火星，几只木箱被人拖向林深处。",
+          exits: { south: "pine_path", east: "hidden_gully" },
+          npcs: [
+            { id: "camp_guard", name: "守火汉子", role: "营地守卫", talk: "守火汉子握紧刀柄：火灭了，账还没清。", spar: "bladeBandit" }
+          ],
+          story: [
+            { id: "search_camp", name: "翻查木箱", requires: "forest_map", gain: { exp: 22, silver: 14 }, flag: "camp_clue", once: true, text: "木箱里藏着药材和兵刃清单，收货地点写着回声谷。" }
+          ]
+        },
+        hidden_gully: {
+          name: "隐谷入口",
+          loc: "valley",
+          x: 2,
+          y: 0,
+          desc: "藤蔓遮住一线山缝，风从缝里吹出极长的回声。",
+          exits: { west: "fire_camp" },
+          npcs: [
+            { id: "valley_swordsman", name: "守谷剑客", role: "隐谷守路人", talk: "剑客横剑：入谷问路，先问你的剑答不答应。", spar: "lostSwordsman" }
+          ],
+          story: [
+            { id: "finish_ch2", name: "追入隐谷", requires: "camp_clue", combat: "lostSwordsman", gain: { exp: 44, cultivation: 28 }, flag: "ch2_done", once: true, text: "你追入隐谷，与守路剑客交手。更深的回声谷剧情等待展开。" }
+          ]
+        }
+      }
+    }
+  },
   locations: {
     town: {
       name: "平安镇",
@@ -184,6 +372,11 @@ function defaultState() {
     name: "沈青",
     title: "青岚外门弟子",
     location: "town",
+    chapter: "ch1",
+    room: "town_gate",
+    unlockedChapters: ["ch1"],
+    storyFlags: {},
+    storyDone: {},
     idle: "meditate",
     dayMinutes: 6 * 60,
     lastSaved: Date.now(),
@@ -203,6 +396,8 @@ function defaultState() {
 let state = loadState();
 let selectedSkill = DATA.skills[0].id;
 let combat = null;
+let jianghuMode = "select";
+let combatRoundNo = 0;
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Math.floor(n).toLocaleString("zh-CN");
@@ -214,10 +409,22 @@ function loadState() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
-    return { ...defaultState(), ...parsed, lastSaved: parsed.lastSaved || Date.now() };
+    const merged = { ...defaultState(), ...parsed, lastSaved: parsed.lastSaved || Date.now() };
+    migrateStoryState(merged);
+    return merged;
   } catch {
     return defaultState();
   }
+}
+
+function migrateStoryState(target) {
+  target.unlockedChapters = Array.isArray(target.unlockedChapters) ? target.unlockedChapters : ["ch1"];
+  target.storyFlags = target.storyFlags || {};
+  target.storyDone = target.storyDone || {};
+  if (!DATA.chapters[target.chapter]) target.chapter = "ch1";
+  const chapter = DATA.chapters[target.chapter];
+  if (!chapter.rooms[target.room]) target.room = chapter.start;
+  target.location = chapter.rooms[target.room].loc;
 }
 
 function saveState(silent = false) {
@@ -383,7 +590,9 @@ function resourceName(key) {
 
 function renderAll() {
   const current = stats();
-  const loc = DATA.locations[state.location];
+  const chapter = DATA.chapters[state.chapter];
+  const room = chapter.rooms[state.room];
+  const loc = DATA.locations[room.loc];
   state.hp = clamp(state.hp, 0, current.maxHp);
   state.mp = clamp(state.mp, 0, current.maxMp);
 
@@ -397,40 +606,164 @@ function renderAll() {
   $("cultText").textContent = fmt(state.resources.cultivation);
   $("expText").textContent = fmt(state.resources.exp);
   $("contribText").textContent = fmt(state.resources.contrib);
+  setTextIfExists("hallSilverText", fmt(state.resources.silver));
+  setTextIfExists("hallCultText", fmt(state.resources.cultivation));
+  setTextIfExists("hallExpText", fmt(state.resources.exp));
+  setTextIfExists("hallContribText", fmt(state.resources.contrib));
+  $("chapterTitle").textContent = chapter.name;
+  $("chapterGoal").textContent = chapter.goal;
+  setTextIfExists("hallName", chapter.name.includes("章") ? "碧海楼" : chapter.name);
+  setTextIfExists("hallQuote", state.log[0]?.replace(/^\[[^\]]+\]\s*/, "") || "屋外传来一阵敲门声，应是有人前来拜访。");
   $("locationName").textContent = loc.name;
-  $("locationDesc").textContent = loc.desc;
+  $("locationDesc").textContent = room.desc;
   $("dangerText").textContent = loc.danger;
   $("idleMode").textContent = `当前：${DATA.idleActions[state.idle].name}`;
   $("dayText").textContent = timeLabel();
   $("realmTag").textContent = realmName();
 
+  renderChapterList();
   renderMap();
   renderIdle();
   renderLocationActions();
+  renderStoryActions();
+  renderNpcs();
   renderEnemies();
   renderSkills();
   renderInventory();
   renderStats();
   renderLog();
   renderRecentLog();
+  renderRumorBar();
+}
+
+function setTextIfExists(id, text) {
+  const el = $(id);
+  if (el) el.textContent = text;
+}
+
+function renderChapterList() {
+  const box = $("chapterList");
+  if (!box) return;
+  box.innerHTML = "";
+  const chapters = Object.entries(DATA.chapters).sort(([, a], [, b]) => a.order - b.order);
+  for (const [id, chapter] of chapters) {
+    const unlocked = state.unlockedChapters.includes(id) || !chapter.unlock || state.storyFlags[chapter.unlock];
+    const done = state.storyFlags[`${id}_done`];
+    const btn = document.createElement("button");
+    btn.className = `chapter-card ${id === state.chapter ? "current" : ""}`;
+    btn.disabled = !unlocked;
+    btn.innerHTML = `
+      <strong>${chapter.name}</strong>
+      <span>${done ? "已通关" : unlocked ? "可进入" : "未开启"}</span>
+      <small>${chapter.goal}</small>
+    `;
+    btn.addEventListener("click", () => enterChapter(id));
+    box.append(btn);
+  }
+}
+
+function enterChapter(chapterId) {
+  const chapter = DATA.chapters[chapterId];
+  if (!chapter) return;
+  const unlocked = state.unlockedChapters.includes(chapterId) || !chapter.unlock || state.storyFlags[chapter.unlock];
+  if (!unlocked) return;
+  if (!state.unlockedChapters.includes(chapterId)) state.unlockedChapters.push(chapterId);
+  state.chapter = chapterId;
+  if (!chapter.rooms[state.room]) state.room = chapter.start;
+  state.location = chapter.rooms[state.room].loc;
+  jianghuMode = "room";
+  showJianghuMode();
+  renderAll();
+  saveState(true);
+}
+
+function showJianghuMode() {
+  const select = $("chapterSelect");
+  const room = $("roomScreen");
+  if (!select || !room) return;
+  select.classList.toggle("hidden", jianghuMode !== "select");
+  room.classList.toggle("hidden", jianghuMode !== "room");
 }
 
 function renderMap() {
-  const box = $("mapButtons");
+  const box = $("roomGrid");
+  if (!box) return;
   box.innerHTML = "";
-  for (const [id, loc] of Object.entries(DATA.locations)) {
-    const btn = document.createElement("button");
-    btn.innerHTML = `<strong>${loc.name}</strong><br><small>${loc.danger} · ${loc.desc}</small>`;
-    btn.disabled = id === state.location;
-    btn.addEventListener("click", () => {
-      state.location = id;
-      addGain({ exp: 3 });
-      addLog(`你动身前往${loc.name}。`);
-      renderAll();
-      saveState(true);
-    });
-    box.append(btn);
+  const chapter = DATA.chapters[state.chapter];
+  const room = chapter.rooms[state.room];
+  const roomEntries = Object.entries(chapter.rooms);
+  const layout = chapterLayout(chapter);
+  const orderedRooms = [...roomEntries].sort(([, a], [, b]) => mapY(a.y, a.x, layout) - mapY(b.y, b.x, layout));
+  const drawn = new Set();
+  const lines = [];
+  for (const [roomId, roomData] of roomEntries) {
+    for (const targetId of Object.values(roomData.exits || {})) {
+      const target = chapter.rooms[targetId];
+      if (!target) continue;
+      const key = [roomId, targetId].sort().join(":");
+      if (drawn.has(key)) continue;
+      drawn.add(key);
+      lines.push(`<line x1="${mapX(roomData.x, roomData.y, layout)}" y1="${mapY(roomData.y, roomData.x, layout)}" x2="${mapX(target.x, target.y, layout)}" y2="${mapY(target.y, target.x, layout)}"></line>`);
+    }
   }
+  const nodes = orderedRooms.map(([roomId, roomData]) => {
+    const active = roomId === state.room;
+    const reachable = canReachRoom(roomId);
+    const storyCount = (roomData.story || []).filter((story) => {
+      if (story.once && state.storyDone[story.id]) return false;
+      if (story.requires && !state.storyFlags[story.requires]) return false;
+      return true;
+    }).length;
+    const hasNpc = (roomData.npcs || []).length > 0;
+    const className = ["map-node", active ? "active" : "", reachable ? "reachable" : "", storyCount ? "has-story" : "", hasNpc ? "has-npc" : ""].join(" ");
+    return `<button class="${className}" data-room="${roomId}" style="left:${mapX(roomData.x, roomData.y, layout)}%; top:${mapY(roomData.y, roomData.x, layout)}%;">
+      <strong>${roomData.name}</strong>
+      <span>${active ? "所在" : reachable ? "可达" : "路远"}</span>
+    </button>`;
+  });
+  box.innerHTML = `
+    <div class="map-board">
+      <svg class="map-lines" viewBox="0 0 100 100" aria-hidden="true">${lines.join("")}</svg>
+      ${nodes.join("")}
+    </div>
+  `;
+  box.querySelectorAll("[data-room]").forEach((cell) => {
+    cell.addEventListener("click", () => {
+      const target = cell.dataset.room;
+      if (target === state.room) return;
+      moveToRoom(target);
+    });
+  });
+
+  const moves = $("mapButtons");
+  if (!moves) return;
+  moves.innerHTML = "";
+  for (const [dir, targetRoomId] of Object.entries(room.exits || {})) {
+    const target = chapter.rooms[targetRoomId];
+    const btn = document.createElement("button");
+    btn.innerHTML = `<strong>向${directionLabel(dir)}移动</strong><br><small>前往${target.name}</small>`;
+    btn.addEventListener("click", () => moveToRoom(targetRoomId));
+    moves.append(btn);
+  }
+}
+
+function chapterLayout(chapter) {
+  const rooms = Object.values(chapter.rooms);
+  const minY = Math.min(...rooms.map((room) => room.y));
+  const maxY = Math.max(...rooms.map((room) => room.y));
+  const span = Math.max(1, maxY - minY);
+  return { minY, span };
+}
+
+function mapX(x) {
+  const anchors = [26, 50, 74];
+  return anchors[x] ?? 50;
+}
+
+function mapY(y, x, layout) {
+  const base = 12 + ((y - layout.minY) / layout.span) * 76;
+  const branchOffset = x === 1 ? 0 : x === 0 ? 4 : -4;
+  return clamp(base + branchOffset, 12, 88);
 }
 
 function renderIdle() {
@@ -453,7 +786,9 @@ function renderIdle() {
 function renderLocationActions() {
   const box = $("locationActions");
   box.innerHTML = "";
-  const loc = DATA.locations[state.location];
+  const chapter = DATA.chapters[state.chapter];
+  const room = chapter.rooms[state.room];
+  const loc = DATA.locations[room.loc];
   for (const action of loc.actions) {
     const btn = document.createElement("button");
     const cost = action.cost ? `耗：${describeGain(action.cost)}` : "无需花费";
@@ -464,8 +799,102 @@ function renderLocationActions() {
   }
 }
 
+function renderStoryActions() {
+  const box = $("storyActions");
+  if (!box) return;
+  box.innerHTML = "";
+  const chapter = DATA.chapters[state.chapter];
+  const room = chapter.rooms[state.room];
+  const actions = (room.story || []).filter((story) => {
+    if (story.once && state.storyDone[story.id]) return false;
+    if (story.requires && !state.storyFlags[story.requires]) return false;
+    return true;
+  });
+  if (!actions.length) {
+    box.innerHTML = `<div class="text-log">这一格暂无新剧情，继续走格子或回头看看别处。</div>`;
+    return;
+  }
+  for (const story of actions) {
+    const btn = document.createElement("button");
+    btn.innerHTML = `<strong>${story.name}</strong><br><small>${story.text}</small>`;
+    btn.addEventListener("click", () => runStoryAction(story));
+    box.append(btn);
+  }
+}
+
+function renderNpcs() {
+  const box = $("npcActions");
+  if (!box) return;
+  box.innerHTML = "";
+  const room = DATA.chapters[state.chapter].rooms[state.room];
+  const npcs = room.npcs || [];
+  if (!npcs.length) {
+    box.innerHTML = `<div class="text-log compact-log">此处暂无人停留。</div>`;
+    return;
+  }
+  for (const npc of npcs) {
+    const row = document.createElement("div");
+    row.className = "npc-card";
+    const duel = npc.spar ? `<button data-duel="${npc.id}">切磋</button>` : "";
+    row.innerHTML = `
+      <div>
+        <strong>${npc.name}</strong>
+        <span>${npc.role}</span>
+      </div>
+      <div class="button-grid">
+        <button data-talk="${npc.id}">交谈</button>
+        ${duel}
+      </div>
+    `;
+    row.querySelector("[data-talk]").addEventListener("click", () => talkToNpc(npc));
+    const duelBtn = row.querySelector("[data-duel]");
+    if (duelBtn) duelBtn.addEventListener("click", () => sparWithNpc(npc));
+    box.append(row);
+  }
+}
+
+function talkToNpc(npc) {
+  addGain({ exp: 3 });
+  addLog(`${npc.name}说：${npc.talk}`);
+  renderAll();
+  saveState(true);
+}
+
+function sparWithNpc(npc) {
+  if (!npc.spar) return;
+  addLog(`你向${npc.name}抱拳，请教几招。`);
+  startCombat(npc.spar, npc.name);
+}
+
 function describeGain(gain = {}) {
   return Object.entries(gain).map(([key, value]) => `${resourceName(key)} ${fmt(value)}`).join("、");
+}
+
+function directionLabel(dir) {
+  return ({ north: "北", south: "南", east: "东", west: "西" })[dir] || dir;
+}
+
+function moveToRoom(targetRoomId) {
+  const chapter = DATA.chapters[state.chapter];
+  if (!chapter.rooms[targetRoomId]) return;
+  if (targetRoomId !== state.room && !canReachRoom(targetRoomId)) {
+    addLog("道路不通，需沿相邻格子前往。");
+    renderAll();
+    return;
+  }
+  state.room = targetRoomId;
+  state.location = chapter.rooms[targetRoomId].loc;
+  const room = chapter.rooms[targetRoomId];
+  addGain({ exp: 2 });
+  addLog(`你向${room.name}移动。`);
+  if (room.loc === "forest" && Math.random() < .3) maybeIdleEvent();
+  renderAll();
+  saveState(true);
+}
+
+function canReachRoom(targetRoomId) {
+  const room = DATA.chapters[state.chapter].rooms[state.room];
+  return Object.values(room.exits || {}).includes(targetRoomId);
 }
 
 function runLocationAction(action) {
@@ -480,10 +909,35 @@ function runLocationAction(action) {
   saveState(true);
 }
 
+function runStoryAction(story) {
+  if (!canPay(story.cost)) return;
+  if (!pay(story.cost)) return;
+  if (story.combat) startCombat(story.combat);
+  if (story.gain) addGain(story.gain);
+  if (story.item && (story.chance === undefined || Math.random() < story.chance)) addItem(story.item, story.count || 1);
+  if (story.text) addLog(story.text);
+  if (story.flag) state.storyFlags[story.flag] = true;
+  if (story.once) state.storyDone[story.id] = true;
+  if (story.unlockChapter) {
+    if (!state.unlockedChapters.includes(story.unlockChapter)) state.unlockedChapters.push(story.unlockChapter);
+    const nextChapter = DATA.chapters[story.unlockChapter];
+    if (nextChapter) {
+      state.chapter = story.unlockChapter;
+      state.room = nextChapter.start;
+      state.location = nextChapter.rooms[nextChapter.start].loc;
+      addLog(`新章节已开启：${nextChapter.name}`);
+    }
+  }
+  renderAll();
+  saveState(true);
+}
+
 function renderEnemies() {
   const box = $("enemyList");
   box.innerHTML = "";
-  for (const enemyId of DATA.locations[state.location].enemies) {
+  const room = DATA.chapters[state.chapter].rooms[state.room];
+  const loc = DATA.locations[room.loc];
+  for (const enemyId of loc.enemies) {
     const enemy = DATA.enemies[enemyId];
     const btn = document.createElement("button");
     btn.innerHTML = `<strong>挑战${enemy.name}</strong><br><small>气血 ${enemy.hp} · 攻 ${enemy.atk} · 防 ${enemy.def}</small>`;
@@ -492,16 +946,30 @@ function renderEnemies() {
   }
 }
 
-function startCombat(enemyId) {
+function startCombat(enemyId, sourceName = "") {
   const enemy = { ...DATA.enemies[enemyId], id: enemyId, hpNow: DATA.enemies[enemyId].hp };
-  combat = { enemy, lines: [`你与${enemy.name}交上了手。`] };
+  combatRoundNo = 0;
+  combat = { enemy, sourceName, active: true, lines: [`你与${sourceName || enemy.name}交上了手。`] };
   $("combatStatus").textContent = `对手：${enemy.name}`;
-  for (let round = 1; round <= 12 && enemy.hpNow > 0 && state.hp > 0; round++) {
-    combatRound(enemy, round);
+  renderCombat();
+  renderAll();
+  saveState(true);
+}
+
+function advanceCombat() {
+  if (!combat?.active) return;
+  combatRoundNo += 1;
+  combatRound(combat.enemy, combatRoundNo);
+  if (combat.enemy.hpNow <= 0) {
+    combat.active = false;
+    winCombat(combat.enemy);
+  } else if (state.hp <= 0) {
+    combat.active = false;
+    loseCombat(combat.enemy);
+  } else if (combatRoundNo >= 16) {
+    combat.active = false;
+    combat.lines.unshift("双方各退半步，此战暂歇。");
   }
-  if (enemy.hpNow <= 0) winCombat(enemy);
-  else if (state.hp <= 0) loseCombat(enemy);
-  else combat.lines.unshift("双方各退半步，此战暂歇。");
   renderCombat();
   renderAll();
   saveState(true);
@@ -516,23 +984,34 @@ function combatRound(enemy, round) {
     let dmg = Math.max(3, current.atk + rand(1, 10) - enemy.def);
     if (crit) dmg = Math.floor(dmg * 1.55);
     enemy.hpNow -= dmg;
-    combat.lines.unshift(`第${round}合，你${crit ? "觑准破绽，" : ""}一招得手，伤其 ${dmg} 点。`);
+    combat.lines.unshift(`第${round}回合，你${crit ? "觑准破绽，" : ""}${playerAttackName()}，伤其 ${dmg} 点。`);
     if (control) {
       combat.lines.unshift(`你以擒拿牵住对方腕脉，${enemy.name}这一息难以反击。`);
       return;
     }
   } else {
-    combat.lines.unshift(`第${round}合，你攻势落空。`);
+    combat.lines.unshift(`第${round}回合，你出招落空。`);
   }
   if (enemy.hpNow <= 0) return;
   const enemyHit = clamp((70 + enemy.agi - current.agi) / 100, .35, .88);
   if (Math.random() < enemyHit) {
     const dmg = Math.max(2, enemy.atk + rand(0, 8) - current.def);
     state.hp -= dmg;
-    combat.lines.unshift(`${enemy.name}还了一击，你受伤 ${dmg} 点。`);
+    combat.lines.unshift(`${enemy.name}${enemyAttackName(enemy)}，你受伤 ${dmg} 点。`);
   } else {
     combat.lines.unshift(`${enemy.name}反击被你闪开。`);
   }
+}
+
+function playerAttackName() {
+  const weapon = state.equipment.weapon ? DATA.items[state.equipment.weapon].name : "以木剑递招";
+  return `${weapon}${pick(["直刺中宫", "横扫下盘", "斜挑肩井", "逼开门户"])}`;
+}
+
+function enemyAttackName(enemy) {
+  if (enemy.atk >= 22) return pick(["挥刀猛劈", "抢步突刺", "连环急攻"]);
+  if (enemy.agi >= 12) return pick(["贴身快打", "侧身扑击", "闪到近前"]);
+  return pick(["还了一拳", "抬臂格击", "沉肩撞来"]);
 }
 
 function winCombat(enemy) {
@@ -558,7 +1037,49 @@ function rand(min, max) {
 }
 
 function renderCombat() {
-  $("combatLog").innerHTML = combat ? combat.lines.slice(0, 12).map((line) => `<div>${line}</div>`).join("") : "";
+  if (!combat) {
+    $("combatLog").innerHTML = "";
+    return;
+  }
+  const current = stats();
+  const enemy = combat.enemy;
+  const enemyHp = clamp(enemy.hpNow, 0, enemy.hp);
+  $("combatLog").innerHTML = `
+    <div class="fight-board">
+      <div class="battle-stage ${combat.active ? "clashing" : ""}">
+        <div class="sprite hero-sprite">
+          <span class="head"></span>
+          <span class="body"></span>
+          <span class="arm weapon"></span>
+          <span class="leg one"></span>
+          <span class="leg two"></span>
+        </div>
+        <div class="blade-line"></div>
+        <div class="sprite enemy-sprite">
+          <span class="head"></span>
+          <span class="body"></span>
+          <span class="arm weapon"></span>
+          <span class="leg one"></span>
+          <span class="leg two"></span>
+        </div>
+      </div>
+      <div class="fighters">
+        <div class="fighter">
+          <strong>${state.name}</strong>
+          <span>气血 ${fmt(state.hp)} / ${fmt(current.maxHp)}</span>
+          <i><b style="width:${(state.hp / current.maxHp) * 100}%"></b></i>
+        </div>
+        <div class="fighter enemy">
+          <strong>${combat.sourceName || enemy.name}</strong>
+          <span>气血 ${fmt(enemyHp)} / ${fmt(enemy.hp)}</span>
+          <i><b style="width:${(enemyHp / enemy.hp) * 100}%"></b></i>
+        </div>
+      </div>
+      <button id="nextRoundBtn" ${combat.active ? "" : "disabled"}>${combat.active ? `第 ${combatRoundNo + 1} 回合` : "战斗结束"}</button>
+    </div>
+    ${combat.lines.slice(0, 12).map((line) => `<div>${line}</div>`).join("")}
+  `;
+  $("nextRoundBtn")?.addEventListener("click", advanceCombat);
 }
 
 function renderSkills() {
@@ -683,6 +1204,8 @@ function renderEquipment() {
 
 function renderStats() {
   const current = stats();
+  const chapter = DATA.chapters[state.chapter];
+  const room = chapter.rooms[state.room];
   const rows = [
     ["境界", realmName()],
     ["气血上限", current.maxHp],
@@ -693,7 +1216,8 @@ function renderStats() {
     ["命中", `${current.hit}%`],
     ["会心", `${current.crit}%`],
     ["胜场", state.kills],
-    ["地点", DATA.locations[state.location].name]
+    ["章节", chapter.name.replace(/^第.章\s*/, "")],
+    ["地点", room.name]
   ];
   $("statsList").innerHTML = rows.map(([key, value]) => `<div class="stat"><span>${key}</span><b>${value}</b></div>`).join("");
 }
@@ -717,8 +1241,17 @@ function renderRecentLog() {
   target.innerHTML = state.log.slice(0, 6).map((line) => `<div>${line}</div>`).join("");
 }
 
+function renderRumorBar() {
+  const latest = state.log[0]?.replace(/^\[[^\]]+\]\s*/, "") || "屋外传来一阵敲门声，应是有人前来拜访。";
+  const rumor = $("rumorBar");
+  if (rumor) rumor.textContent = latest;
+  const hallActivity = $("hallActivity");
+  if (hallActivity) hallActivity.innerHTML = state.log.slice(0, 4).map((line) => `<div>${line}</div>`).join("");
+}
+
 function triggerEvent() {
-  const pool = DATA.events.filter((event) => event.loc === state.location);
+  const room = DATA.chapters[state.chapter].rooms[state.room];
+  const pool = DATA.events.filter((event) => event.loc === room.loc);
   const event = pick(pool);
   state.seenEvents[event.title] = (state.seenEvents[event.title] || 0) + 1;
   $("choiceTitle").textContent = event.title;
@@ -746,15 +1279,19 @@ function triggerEvent() {
 }
 
 function setupEvents() {
-  document.querySelectorAll(".bottom-tabs button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".bottom-tabs button").forEach((item) => item.classList.remove("active"));
-      document.querySelectorAll(".view").forEach((view) => view.classList.remove("active"));
-      btn.classList.add("active");
-      $(`view${btn.dataset.tab[0].toUpperCase()}${btn.dataset.tab.slice(1)}`).classList.add("active");
-    });
+  bindNav("enterJianghuBtn", "jianghu");
+  bindNav("enterMartialBtn", "martial");
+  bindNav("enterPackBtn", "pack");
+  bindNav("enterRoleBtn", "role");
+  bindNav("enterTaskBtn", "log");
+  bindNav("enterSettingsBtn", "log");
+  $("backHomeBtn").addEventListener("click", () => showView("home"));
+  $("backChapterBtn").addEventListener("click", () => {
+    jianghuMode = "select";
+    showJianghuMode();
+    renderAll();
   });
-  $("exploreBtn").addEventListener("click", () => triggerEvent());
+  $("exploreBtn")?.addEventListener("click", () => triggerEvent());
   $("saveBtn").addEventListener("click", () => saveState());
   $("exportBtn").addEventListener("click", async () => {
     const text = JSON.stringify(state, null, 2);
@@ -799,6 +1336,22 @@ function setupEvents() {
     renderAll();
     saveState(true);
   });
+}
+
+function bindNav(id, tab) {
+  const el = $(id);
+  if (el) el.addEventListener("click", () => showView(tab));
+}
+
+function showView(tab) {
+  document.querySelectorAll(".view").forEach((view) => view.classList.remove("active"));
+  const id = `view${tab[0].toUpperCase()}${tab.slice(1)}`;
+  const target = $(id);
+  if (target) target.classList.add("active");
+  if (tab === "jianghu") {
+    jianghuMode = "select";
+    showJianghuMode();
+  }
 }
 
 function tick() {
