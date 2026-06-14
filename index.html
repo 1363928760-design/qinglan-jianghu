@@ -65,6 +65,15 @@
             <div><span>金钱</span><b id="hallSilverText">0</b></div>
             <div><span>门派声望</span><b id="hallContribText">0</b></div>
           </div>
+          <div class="home-profile">
+            <div class="hero-portrait" aria-hidden="true"><span>青</span></div>
+            <div class="home-profile-copy">
+              <strong id="homeProfileName">沈青</strong>
+              <span id="homeProfileTitle">青岚外门弟子</span>
+              <p id="homeProfileVitals">精力充沛，气息平稳。</p>
+            </div>
+            <button id="homeAttrBtn" class="side-tab">属性</button>
+          </div>
           <div class="hall-quote" id="hallQuote">屋外传来一阵敲门声，应是有人前来拜访。</div>
         </section>
 
@@ -130,7 +139,18 @@
             </div>
           </section>
 
-          <section class="paper">
+          <section id="combatPanel" class="paper combat-panel hidden">
+            <div class="section-head slim">
+              <div>
+                <span class="chapter-title">战斗面板</span>
+                <h2 id="combatTitle">未交手</h2>
+              </div>
+              <span id="combatStatus" class="hint">准备中</span>
+            </div>
+            <div id="combatLog" class="combat-log"></div>
+          </section>
+
+          <section class="paper map-section">
             <div class="section-head slim">
               <h2>章节地图</h2>
               <span id="chapterGoal" class="hint">查访空船来历</span>
@@ -139,7 +159,7 @@
             <div id="mapButtons" class="command-list"></div>
           </section>
 
-          <section class="paper">
+          <section class="paper npc-section">
             <div class="section-head slim">
               <h2>人物交互</h2>
               <span class="hint">交谈 / 切磋</span>
@@ -147,30 +167,29 @@
             <div id="npcActions" class="command-list"></div>
           </section>
 
-          <section class="paper">
+          <section class="paper story-section">
             <div class="section-head slim">
               <h2>章节剧情</h2>
             </div>
             <div id="storyActions" class="command-list"></div>
           </section>
 
-          <section class="paper">
+          <section class="paper location-section">
             <div class="section-head slim">
               <h2>地点指令</h2>
             </div>
             <div id="locationActions" class="command-list"></div>
           </section>
 
-          <section class="paper">
+          <section class="paper combat-list-section">
             <div class="section-head slim">
-              <h2>切磋战斗</h2>
-              <span id="combatStatus" class="hint">未交手</span>
+              <h2>附近对手</h2>
+              <span class="hint">点名切磋</span>
             </div>
             <div id="enemyList" class="command-list"></div>
-            <div id="combatLog" class="text-log"></div>
           </section>
 
-          <section class="paper">
+          <section class="paper recent-section">
             <div class="section-head slim">
               <h2>近期传闻</h2>
             </div>
@@ -185,6 +204,7 @@
             <h2>青岚武学</h2>
             <span class="stamp">十二门</span>
           </div>
+          <div id="skillTabs" class="skill-tabs"></div>
           <div id="skillList" class="skill-list"></div>
         </section>
         <section class="paper">
@@ -193,6 +213,13 @@
             <span id="selectedSkillTag" class="hint">未选择</span>
           </div>
           <div id="skillDetail" class="skill-detail">选择一门武学查看招式与修习消耗。</div>
+        </section>
+        <section class="paper">
+          <div class="section-head slim">
+            <h2>准备武功</h2>
+            <span class="hint">影响战斗描述</span>
+          </div>
+          <div id="preparedSkills" class="prepared-skills"></div>
         </section>
       </section>
 
@@ -226,13 +253,24 @@
           </div>
           <div class="sect-copy">
             <p>青岚剑派立在山雨之间，讲究“剑起有痕，心落无声”。掌门不问出身，只看弟子能否守住一口清气。</p>
-            <button id="sectTaskBtn">接门派差事</button>
-            <button id="healBtn">药庐调息</button>
+            <div class="sect-actions">
+              <button id="sectTaskBtn">师门任务</button>
+              <button id="healBtn">药庐调息</button>
+              <button id="sectBuildBtn">师门建设</button>
+              <button id="kowtowBtn">磕头请安</button>
+            </div>
           </div>
         </section>
       </section>
 
       <section id="viewLog" class="view">
+        <section class="paper task-board">
+          <div class="section-head slim">
+            <h2>任务</h2>
+            <span class="hint">单机自动收益</span>
+          </div>
+          <div id="taskBoard" class="task-board-list"></div>
+        </section>
         <section class="paper">
           <div class="section-head slim">
             <h2>江湖日志</h2>

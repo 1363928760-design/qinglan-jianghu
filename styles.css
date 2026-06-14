@@ -389,11 +389,11 @@ h2 {
 
 .map-board {
   position: relative;
-  min-height: 310px;
+  min-height: 410px;
   border: 2px solid #121517;
   background:
-    linear-gradient(rgba(17, 22, 23, .42), rgba(77, 89, 89, .74)),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, .04) 0 1px, transparent 1px 18px);
+    linear-gradient(rgba(17, 22, 23, .46), rgba(77, 89, 89, .78)),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, .04) 0 1px, transparent 1px 22px);
   overflow: hidden;
 }
 
@@ -415,8 +415,9 @@ h2 {
 
 .map-lines line {
   stroke: rgba(18, 20, 20, .86);
-  stroke-width: 2.2;
+  stroke-width: 2.4;
   stroke-linecap: round;
+  stroke-dasharray: 0;
 }
 
 .map-node {
@@ -425,8 +426,8 @@ h2 {
   display: grid;
   place-items: center;
   gap: 1px;
-  width: 88px;
-  min-height: 56px;
+  width: 94px;
+  min-height: 58px;
   transform: translate(-50%, -50%);
   border: 3px solid #111315;
   border-radius: 7px;
@@ -450,6 +451,7 @@ h2 {
   background: linear-gradient(#d45550, #b53635);
   color: #fff8ef;
   text-shadow: 0 2px 0 #000;
+  box-shadow: 0 0 0 3px rgba(255, 232, 176, .18);
 }
 
 .map-node.active span {
@@ -458,6 +460,7 @@ h2 {
 
 .map-node.reachable:not(.active) {
   border-color: #755927;
+  box-shadow: 0 0 0 2px rgba(190, 156, 78, .12);
 }
 
 .map-node.has-story::after {
@@ -525,6 +528,45 @@ h2 {
   grid-template-columns: 1fr 1fr;
   gap: 7px;
   margin-top: 9px;
+}
+
+.combat-panel {
+  padding: 10px 10px 12px;
+  background:
+    linear-gradient(rgba(8, 10, 12, .84), rgba(31, 35, 38, .9)),
+    linear-gradient(135deg, rgba(255, 255, 255, .04), transparent 40%);
+}
+
+.combat-log {
+  display: grid;
+  gap: 8px;
+}
+
+.fight-board {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 2px;
+}
+
+.battle-stage {
+  position: relative;
+  min-height: 210px;
+  border: 2px solid #111417;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 100%, rgba(0, 0, 0, .3), transparent 42%),
+    linear-gradient(#3e4850, #1f2327 60%, #111314);
+}
+
+.battle-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 25%, rgba(255, 255, 255, .04), transparent 20%),
+    radial-gradient(circle at 82% 34%, rgba(255, 255, 255, .04), transparent 18%),
+    linear-gradient(to bottom, transparent 0 58%, rgba(0, 0, 0, .28) 100%);
+  pointer-events: none;
 }
 
 .offline {
@@ -764,6 +806,141 @@ h2 {
   gap: 6px;
 }
 
+.combat-section .command-list button,
+.npc-section .command-list button,
+.story-section .command-list button,
+.location-section .command-list button,
+.combat-list-section .command-list button {
+  border-radius: 0;
+}
+
+.battle-stage .sprite {
+  bottom: 22px;
+}
+
+.battle-stage .sprite .head {
+  background: #161a1d;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .04);
+}
+
+.battle-stage .sprite .body,
+.battle-stage .sprite .arm,
+.battle-stage .sprite .leg {
+  background: #191d20;
+}
+
+.battle-stage .sprite.hero-sprite .head,
+.battle-stage .sprite.hero-sprite .body,
+.battle-stage .sprite.hero-sprite .arm,
+.battle-stage .sprite.hero-sprite .leg {
+  background: #23262a;
+}
+
+.battle-stage .sprite.hero-sprite .arm.weapon {
+  background: #d9c27d;
+}
+
+.battle-stage .sprite.enemy-sprite .arm.weapon {
+  background: #843a2d;
+}
+
+.battle-stage .glyph {
+  position: absolute;
+  top: 12px;
+  font-size: 12px;
+  color: rgba(255, 242, 216, .75);
+  letter-spacing: 0;
+}
+
+.battle-stage .glyph.left {
+  left: 10px;
+}
+
+.battle-stage .glyph.right {
+  right: 10px;
+}
+
+.battle-stage .status-chip {
+  position: absolute;
+  top: 38px;
+  min-width: 88px;
+  padding: 4px 6px;
+  border: 1px solid rgba(252, 227, 156, .25);
+  background: rgba(10, 12, 14, .56);
+  color: #f4e7c3;
+  font-size: 11px;
+}
+
+.battle-stage .status-chip.left {
+  left: 10px;
+}
+
+.battle-stage .status-chip.right {
+  right: 10px;
+  text-align: right;
+}
+
+.battle-stage .weapon-trace {
+  position: absolute;
+  left: 50%;
+  bottom: 58px;
+  width: 36%;
+  height: 4px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, #f2dea1 18%, #fff5d7 50%, #f2dea1 82%, transparent);
+  box-shadow: 0 0 16px rgba(255, 228, 156, .55);
+}
+
+.battle-stage.clashing .weapon-trace {
+  width: 26%;
+}
+
+.battle-stage.clashing .hero-sprite {
+  left: 23%;
+}
+
+.battle-stage.clashing .enemy-sprite {
+  right: 21%;
+}
+
+.battle-stage .pulse {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(255, 243, 193, .38);
+  box-shadow: 0 0 22px rgba(255, 243, 193, .56);
+  animation: pulseGlow 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: translate(-50%, -50%) scale(.82); opacity: .42; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: .9; }
+}
+
+.combat-log {
+  border: 1px solid rgba(226, 219, 170, .14);
+  background: rgba(255, 248, 220, .5);
+  max-height: 300px;
+  overflow: auto;
+  padding: 8px;
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.combat-log .combat-line {
+  margin-bottom: 4px;
+  color: #ece3cb;
+  text-shadow: 0 1px 0 #000;
+}
+
+.combat-log .combat-line:nth-child(2n) {
+  color: #d8e4ce;
+}
+
 .compact-log {
   max-height: 142px;
 }
@@ -933,5 +1110,295 @@ dialog::backdrop {
   .quick-row,
   .stats-list {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Final slice polish and overlay fix */
+.mud-app::after {
+  z-index: 0;
+  bottom: calc(38px + env(safe-area-inset-bottom));
+  height: 118px;
+  opacity: .36;
+}
+
+.mud-top,
+.mud-main,
+.rumor-bar,
+dialog {
+  position: relative;
+}
+
+.mud-top {
+  z-index: 10;
+}
+
+.mud-main {
+  z-index: 2;
+}
+
+.paper {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.paper::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(247, 241, 202, .12);
+  pointer-events: none;
+}
+
+.home-profile {
+  display: grid;
+  grid-template-columns: 92px 1fr 48px;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 8px;
+  border: 2px solid #101214;
+  background: rgba(21, 27, 29, .68);
+}
+
+.hero-portrait {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  aspect-ratio: 1;
+  border: 3px solid #0e1113;
+  background:
+    radial-gradient(circle at 48% 36%, #f0dfb1 0 15%, transparent 16%),
+    linear-gradient(135deg, #eef1df 0 48%, #6e7d82 49% 52%, #263136 53% 100%);
+  box-shadow: inset 0 0 0 2px #31424a;
+}
+
+.hero-portrait span {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: rgba(7, 10, 12, .82);
+  color: #d6c978;
+  font-size: 28px;
+  font-weight: 900;
+  text-shadow: 0 2px 0 #000;
+}
+
+.home-profile-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.home-profile-copy strong {
+  color: #2f68d8;
+  font-size: 18px;
+  text-shadow: 0 2px 0 #000;
+}
+
+.home-profile-copy span,
+.home-profile-copy p,
+.npc-card p {
+  color: #d8e0dc;
+  line-height: 1.45;
+}
+
+.side-tab {
+  min-width: 42px;
+  min-height: 86px;
+  padding: 6px 4px;
+  border-radius: 999px 0 0 999px;
+  writing-mode: vertical-rl;
+  background: linear-gradient(#171a1c, #050607);
+  color: #f2f2e8;
+  text-shadow: 0 2px 0 #000;
+}
+
+.skill-tabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 8px;
+  border: 2px solid #101214;
+  background: #f1f0e8;
+  padding: 4px;
+}
+
+.skill-tabs button {
+  min-height: 34px;
+  padding: 4px 2px;
+  border-width: 0;
+  box-shadow: none;
+  background: transparent;
+  font-size: 14px;
+}
+
+.skill-tabs button.active {
+  background: #b7191d;
+  color: #fff;
+  text-shadow: 0 2px 0 #000;
+}
+
+.skill-card.selected {
+  border-color: #801b1d;
+  background: rgba(255, 244, 193, .72);
+}
+
+.skill-card.empty {
+  display: block;
+  text-align: left;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.prepared-skills {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.prepared-slot {
+  display: grid;
+  gap: 3px;
+  min-height: 74px;
+  padding: 7px 4px;
+  border: 2px solid #101214;
+  background: linear-gradient(#faf8e9, #ddd8c5);
+  color: #111;
+  text-align: center;
+  text-shadow: none;
+}
+
+.prepared-slot span {
+  color: #9d8a2d;
+  font-size: 12px;
+}
+
+.prepared-slot strong {
+  font-size: 14px;
+}
+
+.prepared-slot b {
+  color: #333;
+  font-size: 12px;
+}
+
+.task-board-list {
+  display: grid;
+  gap: 8px;
+}
+
+.task-card {
+  display: grid;
+  grid-template-columns: 1fr 96px;
+  gap: 7px 10px;
+  align-items: center;
+  padding: 9px;
+  border: 2px solid #101214;
+  background: linear-gradient(#f6f3e5, #ded9c8);
+  color: #0f1112;
+  text-shadow: none;
+}
+
+.task-card strong {
+  display: block;
+  font-size: 16px;
+}
+
+.task-card span {
+  color: #4b5554;
+  font-size: 12px;
+}
+
+.task-card i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 12px;
+  border: 1px solid #101214;
+  background: #242827;
+}
+
+.task-card i b {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #268247, #78c76b);
+}
+
+.sect-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.combat-panel .fight-board {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.combat-panel .battle-stage {
+  min-height: 220px;
+  border-color: #08090a;
+  background:
+    linear-gradient(to bottom, rgba(58, 68, 73, .95), rgba(23, 26, 28, .98)),
+    repeating-linear-gradient(0deg, transparent 0 21px, rgba(255,255,255,.04) 22px);
+}
+
+.combat-panel .battle-stage::before {
+  inset: 16px;
+}
+
+.combat-panel .combat-log {
+  border: 1px solid rgba(226, 219, 170, .18);
+  background: rgba(10, 12, 14, .72);
+  max-height: none;
+}
+
+.combat-panel .button-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.combat-panel .button-grid button {
+  min-height: 44px;
+  padding: 5px 4px;
+}
+
+.map-board {
+  min-height: 440px;
+}
+
+.map-node {
+  width: 88px;
+  min-height: 52px;
+}
+
+@media (max-width: 420px) {
+  .home-profile {
+    grid-template-columns: 78px 1fr 42px;
+  }
+
+  .hero-portrait {
+    width: 78px;
+  }
+
+  .skill-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .prepared-skills {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .task-card {
+    grid-template-columns: 1fr;
+  }
+
+  .combat-panel .button-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

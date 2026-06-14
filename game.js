@@ -385,6 +385,8 @@ function defaultState() {
     base: { maxHp: 128, maxMp: 82, atk: 18, def: 8, agi: 10, hit: 86, crit: 5 },
     resources: { silver: 45, cultivation: 80, exp: 0, contrib: 20 },
     skills: Object.fromEntries(DATA.skills.map((skill, index) => [skill.id, index < 3 ? 1 : 0])),
+    prepared: { strike: "qinglan_sword", weapon: "qinglan_sword", lightness: "mist_step", inner: "clear_breath", parry: "stone_body" },
+    taskProgress: { rescue: 0, patrol: 0, clue: 0 },
     inventory: { salve: 2, herb: 1 },
     equipment: { weapon: null, armor: null },
     log: ["你拜入青岚剑派，领了两帖金疮药，一柄旧木剑，江湖从此有了你的名字。"],
@@ -395,9 +397,11 @@ function defaultState() {
 
 let state = loadState();
 let selectedSkill = DATA.skills[0].id;
+let selectedSkillType = "全部";
 let combat = null;
 let jianghuMode = "select";
 let combatRoundNo = 0;
+let combatAction = "attack";
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Math.floor(n).toLocaleString("zh-CN");
@@ -421,6 +425,8 @@ function migrateStoryState(target) {
   target.unlockedChapters = Array.isArray(target.unlockedChapters) ? target.unlockedChapters : ["ch1"];
   target.storyFlags = target.storyFlags || {};
   target.storyDone = target.storyDone || {};
+  target.prepared = target.prepared || { strike: "qinglan_sword", weapon: "qinglan_sword", lightness: "mist_step", inner: "clear_breath", parry: "stone_body" };
+  target.taskProgress = target.taskProgress || { rescue: 0, patrol: 0, clue: 0 };
   if (!DATA.chapters[target.chapter]) target.chapter = "ch1";
   const chapter = DATA.chapters[target.chapter];
   if (!chapter.rooms[target.room]) target.room = chapter.start;
@@ -598,6 +604,9 @@ function renderAll() {
 
   $("heroName").textContent = state.name;
   $("heroTitle").textContent = state.title;
+  setTextIfExists("homeProfileName", state.name);
+  setTextIfExists("homeProfileTitle", `${state.title} · ${realmName()}`);
+  setTextIfExists("homeProfileVitals", `精力 ${fmt(Math.floor((state.hp / current.maxHp) * 100))}% · 内息 ${fmt(Math.floor((state.mp / current.maxMp) * 100))}% · ${loc.name}`);
   $("hpBar").style.width = `${(state.hp / current.maxHp) * 100}%`;
   $("mpBar").style.width = `${(state.mp / current.maxMp) * 100}%`;
   $("hpText").textContent = `${fmt(state.hp)} / ${fmt(current.maxHp)}`;
@@ -617,9 +626,13 @@ function renderAll() {
   $("locationName").textContent = loc.name;
   $("locationDesc").textContent = room.desc;
   $("dangerText").textContent = loc.danger;
+  setTextIfExists("combatTitle", combat ? (combat.sourceName || combat.enemy.name) : "未交手");
+  setTextIfExists("combatStatus", combat ? `第 ${combatRoundNo + 1} 回合` : "准备中");
   $("idleMode").textContent = `当前：${DATA.idleActions[state.idle].name}`;
   $("dayText").textContent = timeLabel();
   $("realmTag").textContent = realmName();
+  const combatPanel = $("combatPanel");
+  if (combatPanel) combatPanel.classList.toggle("hidden", !combat);
 
   renderChapterList();
   renderMap();
@@ -629,6 +642,8 @@ function renderAll() {
   renderNpcs();
   renderEnemies();
   renderSkills();
+  renderPreparedSkills();
+  renderTaskBoard();
   renderInventory();
   renderStats();
   renderLog();
@@ -752,17 +767,17 @@ function chapterLayout(chapter) {
   const minY = Math.min(...rooms.map((room) => room.y));
   const maxY = Math.max(...rooms.map((room) => room.y));
   const span = Math.max(1, maxY - minY);
-  return { minY, span };
+  return { minY, maxY, span };
 }
 
 function mapX(x) {
-  const anchors = [26, 50, 74];
+  const anchors = [24, 50, 76];
   return anchors[x] ?? 50;
 }
 
 function mapY(y, x, layout) {
   const base = 12 + ((y - layout.minY) / layout.span) * 76;
-  const branchOffset = x === 1 ? 0 : x === 0 ? 4 : -4;
+  const branchOffset = x === 1 ? 0 : x === 0 ? 5 : -5;
   return clamp(base + branchOffset, 12, 88);
 }
 
@@ -840,6 +855,7 @@ function renderNpcs() {
       <div>
         <strong>${npc.name}</strong>
         <span>${npc.role}</span>
+        <p>${npc.talk}</p>
       </div>
       <div class="button-grid">
         <button data-talk="${npc.id}">交谈</button>
@@ -949,6 +965,7 @@ function renderEnemies() {
 function startCombat(enemyId, sourceName = "") {
   const enemy = { ...DATA.enemies[enemyId], id: enemyId, hpNow: DATA.enemies[enemyId].hp };
   combatRoundNo = 0;
+  combatAction = "attack";
   combat = { enemy, sourceName, active: true, lines: [`你与${sourceName || enemy.name}交上了手。`] };
   $("combatStatus").textContent = `对手：${enemy.name}`;
   renderCombat();
@@ -959,7 +976,8 @@ function startCombat(enemyId, sourceName = "") {
 function advanceCombat() {
   if (!combat?.active) return;
   combatRoundNo += 1;
-  combatRound(combat.enemy, combatRoundNo);
+  combatRound(combat.enemy, combatRoundNo, combatAction);
+  combatAction = "attack";
   if (combat.enemy.hpNow <= 0) {
     combat.active = false;
     winCombat(combat.enemy);
@@ -975,16 +993,45 @@ function advanceCombat() {
   saveState(true);
 }
 
-function combatRound(enemy, round) {
+function chooseCombatAction(action) {
+  combatAction = action;
+  if (combat?.active) advanceCombat();
+}
+
+function combatRound(enemy, round, action = "attack") {
   const current = stats();
-  const hitChance = clamp((current.hit + current.agi - enemy.agi * 2) / 100, .42, .93);
+  const stanceNames = {
+    attack: "出手",
+    guard: "招架",
+    focus: "运功",
+    retreat: "撤步"
+  };
+  if (action === "focus") {
+    const heal = Math.max(3, Math.floor(current.heal + current.maxMp * 0.04));
+    const mp = Math.max(2, Math.floor(current.maxMp * 0.03));
+    state.hp = clamp(state.hp + heal, 0, current.maxHp);
+    state.mp = clamp(state.mp - mp, 0, current.maxMp);
+    combat.lines.unshift(`第${round}回合，你${stanceNames[action]}调息，恢复 ${heal} 气血，消耗 ${mp} 内力。`);
+    return;
+  }
+  if (action === "retreat") {
+    const dodge = clamp((current.agi + current.hit) / 200, .12, .35);
+    if (Math.random() < dodge) {
+      combat.lines.unshift(`第${round}回合，你${stanceNames[action]}后撤，避开了对手的追击。`);
+      return;
+    }
+    combat.lines.unshift(`第${round}回合，你${stanceNames[action]}未能拉开距离。`);
+  }
+  const hitMod = action === "guard" ? -.06 : action === "attack" ? .04 : 0;
+  const damageMod = action === "attack" ? 1.12 : action === "guard" ? .78 : 1;
+  const hitChance = clamp((current.hit + current.agi - enemy.agi * 2) / 100 + hitMod, .42, .93);
   if (Math.random() < hitChance) {
     const crit = Math.random() < (current.crit + statMods().luck) / 100;
     const control = statMods().control && Math.random() < statMods().control / 100;
-    let dmg = Math.max(3, current.atk + rand(1, 10) - enemy.def);
+    let dmg = Math.max(3, Math.floor((current.atk + rand(1, 10) - enemy.def) * damageMod));
     if (crit) dmg = Math.floor(dmg * 1.55);
     enemy.hpNow -= dmg;
-    combat.lines.unshift(`第${round}回合，你${crit ? "觑准破绽，" : ""}${playerAttackName()}，伤其 ${dmg} 点。`);
+    combat.lines.unshift(`第${round}回合，你${crit ? "觑准破绽，" : ""}${playerAttackName(action)}，伤其 ${dmg} 点。`);
     if (control) {
       combat.lines.unshift(`你以擒拿牵住对方腕脉，${enemy.name}这一息难以反击。`);
       return;
@@ -993,9 +1040,9 @@ function combatRound(enemy, round) {
     combat.lines.unshift(`第${round}回合，你出招落空。`);
   }
   if (enemy.hpNow <= 0) return;
-  const enemyHit = clamp((70 + enemy.agi - current.agi) / 100, .35, .88);
+  const enemyHit = clamp((70 + enemy.agi - current.agi) / 100 + (action === "guard" ? -.08 : 0), .35, .88);
   if (Math.random() < enemyHit) {
-    const dmg = Math.max(2, enemy.atk + rand(0, 8) - current.def);
+    const dmg = Math.max(2, Math.floor((enemy.atk + rand(0, 8) - current.def) * (action === "guard" ? .75 : 1)));
     state.hp -= dmg;
     combat.lines.unshift(`${enemy.name}${enemyAttackName(enemy)}，你受伤 ${dmg} 点。`);
   } else {
@@ -1003,9 +1050,14 @@ function combatRound(enemy, round) {
   }
 }
 
-function playerAttackName() {
-  const weapon = state.equipment.weapon ? DATA.items[state.equipment.weapon].name : "以木剑递招";
-  return `${weapon}${pick(["直刺中宫", "横扫下盘", "斜挑肩井", "逼开门户"])}`;
+function playerAttackName(action) {
+  const weapon = state.equipment.weapon ? DATA.items[state.equipment.weapon].name : "木剑";
+  const prepared = DATA.skills.find((skill) => skill.id === state.prepared.weapon);
+  const strike = DATA.skills.find((skill) => skill.id === state.prepared.strike);
+  const mainSkill = prepared || strike;
+  const move = mainSkill ? pick(mainSkill.moves) : pick(["直刺中宫", "横扫下盘", "斜挑肩井", "逼开门户"]);
+  const prefix = action === "guard" ? "回剑" : action === "focus" ? "行气" : action === "retreat" ? "侧身" : "递招";
+  return `${weapon}${prefix}${move}`;
 }
 
 function enemyAttackName(enemy) {
@@ -1037,16 +1089,22 @@ function rand(min, max) {
 }
 
 function renderCombat() {
-  if (!combat) {
-    $("combatLog").innerHTML = "";
+  const panel = $("combatPanel");
+  const box = $("combatLog");
+  if (!combat || !box) {
+    if (box) box.innerHTML = "";
     return;
   }
   const current = stats();
   const enemy = combat.enemy;
   const enemyHp = clamp(enemy.hpNow, 0, enemy.hp);
-  $("combatLog").innerHTML = `
+  box.innerHTML = `
     <div class="fight-board">
       <div class="battle-stage ${combat.active ? "clashing" : ""}">
+        <div class="glyph left">${state.equipment.weapon ? DATA.items[state.equipment.weapon].name : "木剑"}</div>
+        <div class="glyph right">${combat.sourceName || enemy.name}</div>
+        <div class="status-chip left">气血 ${fmt(state.hp)} / ${fmt(current.maxHp)}<br>内力 ${fmt(state.mp)} / ${fmt(current.maxMp)}</div>
+        <div class="status-chip right">气血 ${fmt(enemyHp)} / ${fmt(enemy.hp)}<br>身法 ${fmt(enemy.agi)} · 攻 ${fmt(enemy.atk)}</div>
         <div class="sprite hero-sprite">
           <span class="head"></span>
           <span class="body"></span>
@@ -1054,7 +1112,8 @@ function renderCombat() {
           <span class="leg one"></span>
           <span class="leg two"></span>
         </div>
-        <div class="blade-line"></div>
+        <div class="weapon-trace"></div>
+        <div class="pulse"></div>
         <div class="sprite enemy-sprite">
           <span class="head"></span>
           <span class="body"></span>
@@ -1075,45 +1134,90 @@ function renderCombat() {
           <i><b style="width:${(enemyHp / enemy.hp) * 100}%"></b></i>
         </div>
       </div>
+      <div class="button-grid">
+        <button id="fightAttackBtn" ${combat.active ? "" : "disabled"}>出手</button>
+        <button id="fightGuardBtn" ${combat.active ? "" : "disabled"}>招架</button>
+        <button id="fightFocusBtn" ${combat.active ? "" : "disabled"}>运功</button>
+        <button id="fightRetreatBtn" ${combat.active ? "" : "disabled"}>撤步</button>
+      </div>
       <button id="nextRoundBtn" ${combat.active ? "" : "disabled"}>${combat.active ? `第 ${combatRoundNo + 1} 回合` : "战斗结束"}</button>
     </div>
-    ${combat.lines.slice(0, 12).map((line) => `<div>${line}</div>`).join("")}
+    ${combat.lines.slice(0, 10).map((line) => `<div class="combat-line">${line}</div>`).join("")}
   `;
+  $("fightAttackBtn")?.addEventListener("click", () => chooseCombatAction("attack"));
+  $("fightGuardBtn")?.addEventListener("click", () => chooseCombatAction("guard"));
+  $("fightFocusBtn")?.addEventListener("click", () => chooseCombatAction("focus"));
+  $("fightRetreatBtn")?.addEventListener("click", () => chooseCombatAction("retreat"));
   $("nextRoundBtn")?.addEventListener("click", advanceCombat);
 }
 
 function renderSkills() {
   const list = $("skillList");
+  const tabs = $("skillTabs");
+  if (tabs) {
+    const groups = ["全部", "拳脚", "兵器", "轻功", "内功", "招架", "知识"];
+    tabs.innerHTML = groups.map((group) => `<button class="${group === selectedSkillType ? "active" : ""}" data-skill-tab="${group}">${group}</button>`).join("");
+    tabs.querySelectorAll("[data-skill-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        selectedSkillType = btn.dataset.skillTab;
+        renderSkills();
+      });
+    });
+  }
   list.innerHTML = "";
-  for (const skill of DATA.skills) {
+  for (const skill of DATA.skills.filter((item) => selectedSkillType === "全部" || skillGroup(item) === selectedSkillType)) {
     const lv = getSkillLevel(skill.id);
     const card = document.createElement("button");
-    card.className = "skill-card";
+    card.className = `skill-card ${skill.id === selectedSkill ? "selected" : ""}`;
     card.innerHTML = `<strong>${skill.name}</strong><span class="tag quiet">${skill.type}</span><p>${skill.desc}</p><b>第 ${lv} / ${skill.max} 重</b>`;
     card.addEventListener("click", () => {
       selectedSkill = skill.id;
-      renderSkillDetail();
+      renderSkills();
     });
     list.append(card);
   }
+  if (!list.children.length) list.innerHTML = `<div class="skill-card empty"><p>这一类武学暂未收入纵向切片。</p></div>`;
   renderSkillDetail();
+}
+
+function skillGroup(skill) {
+  if (["掌法", "擒拿"].includes(skill.type)) return "拳脚";
+  if (["剑法", "刀法", "暗器", "绝学"].includes(skill.type)) return "兵器";
+  if (skill.type === "轻功") return "轻功";
+  if (["内功", "心法"].includes(skill.type)) return "内功";
+  if (["横练"].includes(skill.type)) return "招架";
+  return "知识";
+}
+
+function preparedSlotFor(skill) {
+  const group = skillGroup(skill);
+  if (group === "轻功") return "lightness";
+  if (group === "内功") return "inner";
+  if (group === "招架") return "parry";
+  if (group === "兵器") return "weapon";
+  return "strike";
 }
 
 function renderSkillDetail() {
   const skill = DATA.skills.find((item) => item.id === selectedSkill);
   const lv = getSkillLevel(skill.id);
   const cost = skill.baseCost * (lv + 1);
+  const slot = preparedSlotFor(skill);
   $("selectedSkillTag").textContent = `${skill.type} · 第 ${lv} 重`;
   $("skillDetail").innerHTML = `
     <p>${skill.desc}</p>
     <div class="move-list">
       ${skill.moves.map((move, index) => `<div class="move"><strong>${move}</strong><br><span>${index < lv ? "已悟" : "未悟"} · ${index + 1} 式</span></div>`).join("")}
     </div>
-    <button id="learnSkillBtn">${lv >= skill.max ? "已臻上限" : `耗 ${fmt(cost)} 修为修习`}</button>
+    <div class="button-grid">
+      <button id="learnSkillBtn">${lv >= skill.max ? "已臻上限" : `耗 ${fmt(cost)} 修为修习`}</button>
+      <button id="prepareSkillBtn" ${lv <= 0 ? "disabled" : ""}>准备到${preparedSlotName(slot)}</button>
+    </div>
   `;
   const btn = $("learnSkillBtn");
   btn.disabled = lv >= skill.max || state.resources.cultivation < cost;
   btn.addEventListener("click", () => learnSkill(skill, cost));
+  $("prepareSkillBtn")?.addEventListener("click", () => prepareSkill(skill, slot));
 }
 
 function learnSkill(skill, cost) {
@@ -1122,6 +1226,72 @@ function learnSkill(skill, cost) {
   state.skills[skill.id] = getSkillLevel(skill.id) + 1;
   addGain({ exp: 5 + getSkillLevel(skill.id) * 2 });
   addLog(`你修习${skill.name}至第 ${getSkillLevel(skill.id)} 重。`);
+  renderAll();
+  saveState(true);
+}
+
+function prepareSkill(skill, slot = preparedSlotFor(skill)) {
+  if (getSkillLevel(skill.id) <= 0) return;
+  state.prepared[slot] = skill.id;
+  addLog(`你将${skill.name}准备到${preparedSlotName(slot)}。`);
+  renderAll();
+  saveState(true);
+}
+
+function preparedSlotName(slot) {
+  return ({ strike: "拳脚", weapon: "兵器", lightness: "轻功", inner: "内功", parry: "招架" })[slot] || slot;
+}
+
+function renderPreparedSkills() {
+  const box = $("preparedSkills");
+  if (!box) return;
+  const slots = ["strike", "weapon", "lightness", "inner", "parry"];
+  box.innerHTML = slots.map((slot) => {
+    const skill = DATA.skills.find((item) => item.id === state.prepared[slot]);
+    const lv = skill ? getSkillLevel(skill.id) : 0;
+    return `<div class="prepared-slot"><span>${preparedSlotName(slot)}</span><strong>${skill ? skill.name : "未准备"}</strong><b>第 ${lv} 重</b></div>`;
+  }).join("");
+}
+
+function renderTaskBoard() {
+  const box = $("taskBoard");
+  if (!box) return;
+  const tasks = [
+    { id: "rescue", name: "解救忠良", detail: "主线任务", gain: { exp: 36, silver: 12 }, ready: state.storyFlags.boat_trace || state.storyFlags.ch1_done },
+    { id: "patrol", name: "山门巡值", detail: "师门日课", gain: { contrib: 18, exp: 8 }, ready: true },
+    { id: "clue", name: "追查空船", detail: "章节线索", gain: { exp: 22, cultivation: 16 }, ready: state.room !== "town_gate" }
+  ];
+  box.innerHTML = "";
+  for (const task of tasks) {
+    const progress = clamp(state.taskProgress[task.id] || 0, 0, 100);
+    const card = document.createElement("div");
+    card.className = "task-card";
+    card.innerHTML = `
+      <div>
+        <strong>${task.name}</strong>
+        <span>${task.detail} · ${task.ready ? "可推进" : "等待线索"}</span>
+      </div>
+      <i><b style="width:${progress}%"></b></i>
+      <button ${!task.ready ? "disabled" : ""} data-task="${task.id}">${progress >= 100 ? "领取" : `推进 ${progress}%`}</button>
+    `;
+    card.querySelector("[data-task]")?.addEventListener("click", () => advanceTask(task));
+    box.append(card);
+  }
+}
+
+function advanceTask(task) {
+  const current = state.taskProgress[task.id] || 0;
+  if (current < 100) {
+    state.taskProgress[task.id] = clamp(current + rand(28, 42), 0, 100);
+    addGain({ exp: 4 });
+    addLog(`你推进了${task.name}。`);
+    renderAll();
+    saveState(true);
+    return;
+  }
+  addGain(task.gain);
+  state.taskProgress[task.id] = 0;
+  addLog(`${task.name}告一段落，获得${describeGain(task.gain)}。`);
   renderAll();
   saveState(true);
 }
@@ -1285,6 +1455,7 @@ function setupEvents() {
   bindNav("enterRoleBtn", "role");
   bindNav("enterTaskBtn", "log");
   bindNav("enterSettingsBtn", "log");
+  bindNav("homeAttrBtn", "role");
   $("backHomeBtn").addEventListener("click", () => showView("home"));
   $("backChapterBtn").addEventListener("click", () => {
     jianghuMode = "select";
@@ -1319,7 +1490,26 @@ function setupEvents() {
     ];
     const task = pick(tasks);
     addGain(task.gain);
+    state.taskProgress.patrol = clamp((state.taskProgress.patrol || 0) + 22, 0, 100);
     addLog(task.text);
+    renderAll();
+    saveState(true);
+  });
+  $("sectBuildBtn")?.addEventListener("click", () => {
+    const gain = pick([
+      { contrib: 16, exp: 6 },
+      { contrib: 12, cultivation: 18 },
+      { contrib: 18, silver: 8 }
+    ]);
+    addGain(gain);
+    state.taskProgress.patrol = clamp((state.taskProgress.patrol || 0) + 18, 0, 100);
+    addLog(`你参与师门建设，获得${describeGain(gain)}。`);
+    renderAll();
+    saveState(true);
+  });
+  $("kowtowBtn")?.addEventListener("click", () => {
+    addGain({ contrib: 6, exp: 4 });
+    addLog("你向师长请安，执事点头记下你的礼数。");
     renderAll();
     saveState(true);
   });
